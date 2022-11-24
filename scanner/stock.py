@@ -11,7 +11,7 @@ from io import StringIO
 
 
 def find_suppressed(day):
-    df=day
+    df=day.tail(70)
     df['Date'] = pd.to_datetime(df.index)
     df['Date'] = df['Date'].apply(mpl_dates.date2num)
     df = df.loc[:,['Date', 'Open', 'High', 'Low', 'Close']]
