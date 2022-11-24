@@ -122,4 +122,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-CSRF_TRUSTED_ORIGINS = ['https://326a-103-81-152-143.ngrok.io']
+CSRF_TRUSTED_ORIGINS = ['https://12ff-144-24-129-90.in.ngrok.io']
