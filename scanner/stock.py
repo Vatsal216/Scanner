@@ -197,7 +197,7 @@ def stock_scanner(stock_list):
             
                 Trend_last = str(Trend_last)
                 Trend_last=Trend_last.replace("T"," ")
-                Trend_last=Trend_last.split(" ", 1)[0]
+                Trend_last=Trend_last.split(".", 1)[0]
                 
                 
                 minutes['Trend'] = str(minutes['Trend'][1])+'   '+str(Trend_last) + ' '+'Price '+str(int(close_last)) 
