@@ -22,6 +22,7 @@ djangorestframework==3.14.0
 docutils==0.18
 et-xmlfile==1.1.0
 fonttools==4.38.0
+gunicorn==20.1.0
 idna==3.3
 importlib-metadata==4.8.1
 jeepney==0.7.1
@@ -66,6 +67,7 @@ tzdata==2022.4
 urllib3==1.26.7
 webencodings==0.5.1
 websockets==9.1
+whitenoise==6.2.0
 yarl==1.8.1
 yfinance==0.1.87
 zipp==3.6.0
