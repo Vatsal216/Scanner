@@ -1,0 +1,168 @@
+<html>
+    <head><h1>Stock Scanner</h1>
+        <style>
+            table {
+              font-family: arial, sans-serif;
+              border-collapse: collapse;
+              width: 100%;
+            }
+            
+            td, th {
+              border: 1px solid #dddddd;
+              text-align: left;
+              padding: 8px;
+            }
+            
+            tr:nth-child(even) {
+              background-color: #dddddd;
+            }
+
+            td.red {
+                background-color: #F75D59;
+            }
+            td.orange {
+                background-color: orange;
+            }
+            td.green {
+                background-color: #66FF99;
+            }
+            </style>
+    </head>
+    
+
+    <body>
+
+     
+
+         <form action = "." method = "post">
+            {% csrf_token %}
+            <label for="fname">Stock Name:</label>
+            <input type='text' name='name'/>
+            <input type="submit" value=Submit>
+        </form>
+
+        <h1>{{error}}</h1>
+
+        <table border="1" cellspacing="10">
+  
+        <tr>
+            <th>Time</th>
+            <th>Name</th>
+            <th>Close</th>
+            <th>30 Min Trend</th>
+            <th>1 Hr Trend</th>
+            <th>1 Day Trend</th>
+            <th>1 Day MACD Trend</th>
+            <th>1 Week Trend</th>
+            <th>1 Week MACD Trend</th>     
+            <th>Signal</th>
+            <th>Highest</th>
+            <th>up_side</th>
+            <th>Pivot</th>
+            <th>R1</th>
+            <th>R2</th>
+            <th>S1</th>
+            <th>S2</th>
+          
+           
+         
+          
+        </tr>
+        {%for i in data %}
+        <tr>
+       
+            <td >{{i.date}}</td>
+            <td>{{i.name}}</td>
+          <td>{{i.Close}}</td>
+         
+          
+          <td class="
+          {% if 'False' in i.Trend %}red{% endif %}
+          {% if i.Trend == 'True (Now)' %}green{% endif %}
+          {% if 'True' in i.Trend  %}green{% endif %}"
+          >{{i.Trend}}</td>
+
+          <td class="
+          {% if i.1_hr_trend == False %}red{% endif %}
+          {% if i.1_hr_trend == True %}green{% endif %}"
+          >{{i.1_hr_trend}}</td>
+
+          <td class="
+          {% if i.1_day_trend == False %}red{% endif %}
+          {% if i.1_day_trend == True %}green{% endif %}"
+          >{{i.1_day_trend}}</td>
+
+          <td class="
+          {% if i.1_day_macd_trend == False %}red{% endif %}
+          {% if i.1_day_macd_trend == True %}green{% endif %}"
+          >{{i.1_day_macd_trend}}</td>
+
+
+          <td class="
+          {% if i.1_weekly_trend == False %}red{% endif %}
+          {% if i.1_weekly_trend == True %}green{% endif %}"
+          >{{i.1_weekly_trend}}</td>
+
+
+
+          <td class="
+          {% if i.1_weekly_macd_trend == False %}red{% endif %}
+          {% if i.1_weekly_macd_trend == True %}green{% endif %}"
+          >{{i.1_weekly_macd_trend}}</td>
+
+
+
+
+
+          <td class="
+          {% if i.Signla == 'Buy' or  i.Signla == 'Strong Buy' %}green{% endif %}
+          {% if i.Signla == 'Buy (Check Support and Resistance)'%}orange{% endif %}
+          {% if i.Signla != 'Buy'%}red{% endif %}" 	
+          >{{i.Signla}}</td>
+
+          <td class="
+          {% if i.highest < 0  %}red{% endif %}
+          {% if i.highest > 0 %}green{% endif %}"
+          >{{i.highest}}</td>
+
+          <td class="
+          {% if i.up_side < 0  %}red{% endif %}
+          {% if i.up_side > 0 %}green{% endif %}"
+
+          >{{i.up_side}}</td>
+
+          <td 
+          >{{i.Pivot}}</td>
+
+          <td 
+          >{{i.R1}}</td>
+
+
+          <td 
+          >{{i.R2}}</td>
+
+         
+
+          <td 
+          >{{i.S1}}</td>
+
+          <td 
+          >{{i.S2}}</td>
+
+      
+    
+
+        </tr>
+
+        
+     
+        {% endfor %}
+    
+    </table>
+
+  
+
+    {{graph|safe }}
+  
+    </body>
+    </html>
