@@ -88,8 +88,8 @@
           >{{i.1_hr_trend}}</td>
 
           <td class="
-          {% if i.1_day_trend == False %}red{% endif %}
-          {% if i.1_day_trend == True %}green{% endif %}"
+          {% if 'False' in i.1_day_trend %}red{% endif %}
+          {% if 'True' in i.1_day_trend %}green{% endif %}"
           >{{i.1_day_trend}}</td>
 
           <td class="

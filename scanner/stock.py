@@ -67,14 +67,13 @@ def find_suppressed(day):
     
 def stock_scanner(stock_list):
   
-    
-    try: 
+    try:
         lst=[]
         for i in stock_list:
             
             minutes = yf.download(i,period="60d",interval="30m")
             Hr = yf.download(i,period="70d",interval="1h")
-            day = yf.download(i,period="70d",interval="1d")
+            day = yf.download(i,period="360d",interval="1d")
             weeklo = yf.download(i,period="400d",interval="1wk")
             
 
@@ -107,6 +106,8 @@ def stock_scanner(stock_list):
                 da=find_suppressed(day)
             
             minuts = minutes.tail(200)[::-1]
+            day_time =day.tail(1500)[::-1]
+            print(day_time.shape[0])
             minu = minutes.tail(1)
             Trend_last=''
             close_last=0
@@ -119,6 +120,18 @@ def stock_scanner(stock_list):
                 elif minu['Trend'][0] != minuts.iloc[j, 8]:
                     Trend_last = minuts.index.values[j-1]
                     close_last = minuts.iloc[j-1, 3]
+                
+                    break
+            Trend_last_dya=''
+            close_last_dya=0
+            for j in range(len(day_time)):
+                # print(minu['Trend'][0], minuts.iloc[j, 8])
+                if day_time['Trend'][0] == day_time.iloc[j, 11]:
+                    # print(minutes['Trend'][j], minu['Trend'][0],minutes['date_lasta'][j] )
+                    pass
+                elif day_time['Trend'][0] != day_time.iloc[j, 11]:
+                    Trend_last_dya = day_time.index.values[j-1]
+                    close_last_dya = day_time.iloc[j-1, 3]
                 
                     break
             
@@ -184,11 +197,15 @@ def stock_scanner(stock_list):
             
                 Trend_last = str(Trend_last)
                 Trend_last=Trend_last.replace("T"," ")
-                Trend_last=Trend_last.split(".", 1)[0]
+                Trend_last=Trend_last.split(" ", 1)[0]
                 
                 
                 minutes['Trend'] = str(minutes['Trend'][1])+'   '+str(Trend_last) + ' '+'Price '+str(int(close_last)) 
                 minutes['up_side'] = int(minutes['Close'][1] - close_last )
+                Trend_last_dya = str(Trend_last_dya)
+                Trend_last_dya=Trend_last_dya.replace("T"," ")
+                Trend_last_dya=Trend_last_dya.split(" ", 1)[0]
+                minutes['1_day_trend'] = str(minutes['1_day_trend'][1])+'   '+str(Trend_last_dya) + ' '+'Price '+str(int(close_last_dya)) 
                 minutes['highest']=minutes['up_side']
                 minutes['Close']=int(minutes['Close'][1])
                 import json
@@ -203,7 +220,6 @@ def stock_scanner(stock_list):
                             if k == 'highest' and v <minutes['up_side'] :
                                 v=minutes['up_side']
                             
-                
             
         
         
@@ -215,7 +231,8 @@ def stock_scanner(stock_list):
         else:
             return lst
     except Exception as e:
-        return 'Stock Not Found. Kindly add .NS at the end. Example (WIPRO.NS)'
+        'Not Found'
+    
 
 
 
