@@ -37,16 +37,27 @@
          <form action = "." method = "post">
             {% csrf_token %}
             <label for="fname">Stock Name:</label>
+           
             <input type='text' name='name'/>
+
+            <select name='option'>
+              <option selected="true" value="all" disabled="disabled">Choose Tagging</option>
+              <option value="today">Today</option>   
+            </select>
             <input type="submit" value=Submit>
         </form>
+
+   
+
+
+        
 
         <h1>{{error}}</h1>
 
         <table border="1" cellspacing="10">
   
         <tr>
-            <th>Time</th>
+          
             <th>Name</th>
             <th>Close</th>
             <th>30 Min Trend</th>
@@ -71,7 +82,7 @@
         {%for i in data %}
         <tr>
        
-            <td >{{i.date}}</td>
+           
             <td>{{i.name}}</td>
           <td>{{i.Close}}</td>
          
@@ -163,6 +174,7 @@
   
 
     {{graph|safe }}
+   
   
     </body>
     </html>

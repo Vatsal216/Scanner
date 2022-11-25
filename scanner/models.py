@@ -74,11 +74,15 @@ from django.db import models
     
     
     
-class Performance_Stock(models.Model):
-    stock = models.CharField(max_length=255)
-    date = models.DateTimeField(auto_now_add=True, null=True,blank=True)
-    signal = models.CharField(max_length=255, null=True,blank=True)
-    close= models.CharField(max_length=255, null=True,blank=True)
+class Sector(models.Model):
+    sector = models.CharField(max_length=255)
+    def __str__(self):
+        return self.sector
     
+class Performance_Stock(models.Model):
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE, null=True,blank=True)
+    stock = models.CharField(max_length=255)
+
     def __str__(self):
         return self.stock
+    

@@ -10,7 +10,8 @@ from .models import *
 from io import StringIO
 
 
-def find_suppressed(day):
+def find_suppressed(day,new_tad):
+    df2=new_tad
     df=day.tail(70)
     df['Date'] = pd.to_datetime(df.index)
     df['Date'] = df['Date'].apply(mpl_dates.date2num)
@@ -62,19 +63,26 @@ def find_suppressed(day):
         data = imgdata.getvalue()
         
         return data
+    
+    
+    
+   
     da=plot_all() 
     return da
     
 def stock_scanner(stock_list):
   
-    try:
+    
         lst=[]
         for i in stock_list:
+            
             
             minutes = yf.download(i,period="60d",interval="30m")
             Hr = yf.download(i,period="70d",interval="1h")
             day = yf.download(i,period="360d",interval="1d")
             weeklo = yf.download(i,period="400d",interval="1wk")
+            
+           
             
 
 
@@ -102,8 +110,10 @@ def stock_scanner(stock_list):
             weeklo['macd_trend']=weeklo['macd'] > weeklo['macdsignal']
             
             
+            
+            new_tad=day
             if len(stock_list)==1:
-                da=find_suppressed(day)
+                da=find_suppressed(day,new_tad)
             
             minuts = minutes.tail(200)[::-1]
             day_time =day.tail(1500)[::-1]
@@ -155,6 +165,7 @@ def stock_scanner(stock_list):
             minutes['S3'] = int(minutes['Pivot'][0] - 2*(last_day['High'][0] - last_day['Low'][0]))
             
             weeklo = weeklo.tail(2)
+            print(day)
             minutes['1_day_trend'] =  day['Trend'][0]
             minutes['1_hr_trend'] = Hr['Trend'][0]
             minutes['1_day_macd_trend'] = day['macd_trend'][0]
@@ -163,7 +174,8 @@ def stock_scanner(stock_list):
             # minutes['date']=minutes.index.values[1]
             minutes['name']=i
             if len(stock_list)==1:
-                minutes['graph']=da
+                minutes['graph']=da[0]
+                minutes['volumne_graph']=da[1]
             if minutes['Trend'][1] == True and minutes['Trend'][0] == False:
                 # Performance_Stock.objects.filter(name=i).update(signal= minutes['Trend'][1],name=i,close=minutes['Close'][1])
                 
@@ -210,15 +222,20 @@ def stock_scanner(stock_list):
                 minutes['Close']=int(minutes['Close'][1])
                 import json
                 # with open("data.json") as json_file:
-                #     data1 = json.load(json_file)
+                # #     data1 = json.load(json_file)
                 with open("data.json", "r") as read_file:
                     data1 = json.load(read_file)
                     
-                    for k,v in data1[0].items():
+                    for q in data1:
                     
-                        if v==i:
-                            if k == 'highest' and v <minutes['up_side'] :
-                                v=minutes['up_side']
+                        for k,v in q.items():
+                        
+                            if v==i:
+                                if k == 'highest' and v <minutes['up_side'] :
+                                    minutes['highest']=minutes['up_side']
+                                    break
+                            
+                            
                             
             
         
@@ -230,8 +247,7 @@ def stock_scanner(stock_list):
             return lst,da
         else:
             return lst
-    except Exception as e:
-        'Not Found'
+ 
     
 
 

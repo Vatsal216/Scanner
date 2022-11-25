@@ -6,19 +6,39 @@ from .models import *
 import json
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
+from datetime import date, datetime
 
 def HomePage(request):
+    print(request.POST and request.POST['name']!='', request.POST)
     if  request.POST:
         stock_list=[]
-      
-        stock_list.append(request.POST['name'])
-        data=stock_scanner(stock_list)
-        data={'data':data[0],'graph':data[1]}
+        
+        
+        print(request.POST)
+        data={'data':'data not found'}
+    
+        if request.POST['name']!='':
+            stock_list.append(request.POST['name'])
+            data=stock_scanner(stock_list)
+            data={'data':data[0],'graph':data[1]}
+            
+        elif 'option' in request.POST and request.POST['option']!='':
+            with open("data.json") as json_file:
+                data = json.load(json_file)
+            for i in data:
+                for k,v in i.items():
+                    if k == 'Trend': 
+                        dates = v.split()[1]
+                        if datetime.strptime(dates, '%Y-%m-%d').date() == date.today():
+                            stock_list.append(i)
+            
+            data={'data':stock_list}                
+            
+            
         return render(request, 'index.html',data)
     else:
-        
-        a=["data.json"]
-        with open(a[0]) as json_file:
+    
+        with open("data.json") as json_file:
             data = json.load(json_file)
     
         data={'data':data}
