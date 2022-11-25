@@ -27,10 +27,12 @@ def HomePage(request):
                 data = json.load(json_file)
             for i in data:
                 for k,v in i.items():
-                    if k == 'Trend' or  k == '1_day_trend' : 
-                        dates = v.split()[1]
-                        if datetime.strptime(dates, '%Y-%m-%d').date() == date.today():
-                            stock_list.append(i)
+                    if 'Buy' in i['Signla']:
+                        if k == 'Trend' or  k == '1_day_trend':
+                            
+                            dates = v.split()[1]
+                            if datetime.strptime(dates, '%Y-%m-%d').date() == date.today():
+                                stock_list.append(i)
                     
             
             data={'data':stock_list}                
