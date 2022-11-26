@@ -170,7 +170,7 @@ def stock_scanner(stock_list):
             minutes['1_hr_trend'] = Hr['Trend'][0]
             minutes['1_day_macd_trend'] = day['macd_trend'][0]
             minutes['1_weekly_trend']=weeklo['Trend'][0]
-            minutes['1_weekly_macd_trend']=weeklo['Trend'][0]
+            minutes['1_weekly_macd_trend']=weeklo['macd_trend'][0]
             # minutes['date']=minutes.index.values[1]
             minutes['name']=i
             if len(stock_list)==1:
