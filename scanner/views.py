@@ -1,12 +1,30 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .stock import stock_scanner
-from .form   import InputForm
+
 from .models import *
 import json
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 from datetime import date, datetime
+from .forex import forex_scanner
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .utils import *
+from .order import *
+from .strategy import *
+from datetime import datetime
+    
+def ForexPage(request):
+    
+    with open("forex.json") as json_file:
+        data = json.load(json_file)
+
+    data={'data':data}
+    # k7b$Yj6w72KD
+    return render(request, 'index.html',data)
+
+
 
 def HomePage(request):
     print(request.POST and request.POST['name']!='', request.POST)
@@ -47,3 +65,5 @@ def HomePage(request):
         data={'data':data}
         # k7b$Yj6w72KD
         return render(request, 'index.html',data)
+
+
