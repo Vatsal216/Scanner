@@ -9,7 +9,7 @@ from .models import *
 from io import StringIO
 from datetime import date
 import pandas_ta as ta
-import vectorbt as vbt
+# import vectorbt as vbt
 
 def find_suppressed(day, new_tad):
     df2 = new_tad
