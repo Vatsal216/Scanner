@@ -1,81 +1,16 @@
 from django.db import models
-
-# Create your models here.
-
-# class Stocks(models.Model):
-#     symbol = models.CharField(max_length=255)
-#     industry = models.CharField(max_length=255)
-
-
-# class Date(models.Model):
-#     date = models.DateField(auto_now_add=True)
     
-# class day_price(models.Model):
-#     stock = models.ForeignKey(Stocks)
-#     date = models.ForeignKey(Date)
-#     open = models.CharField(max_length=255)
-#     high = models.CharField(max_length=255)
-#     low = models.CharField(max_length=255)
-#     close = models.CharField(max_length=255)
-#     volume = models.CharField(max_length=255)
+class Higher_time(models.Model):
+    signal = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True, null=True)    
+    
+    def __str__(self):
+        return self.name
     
 
-# class Day_Support_Resistance(models.Model):
-#     stock = models.ForeignKey(Stocks)
-#     date = models.ForeignKey(Date)
-#     support = models.CharField(max_length=255)
-#     Resistance = models.CharField(max_length=255)
-
-
-# class Hours_Support_Resistance(models.Model):
-#     stock = models.ForeignKey(Stocks)
-#     date = models.ForeignKey(Date)
-#     support = models.CharField(max_length=255)
-#     Resistance = models.CharField(max_length=255)
-
-
-# class Pivot_Point(models.Model):
-#     stock = models.ForeignKey(Stocks)
-#     date = models.ForeignKey(Date)
-#     S1 = models.CharField(max_length=255)
-#     S2 = models.CharField(max_length=255)
-#     S3 = models.CharField(max_length=255)
-#     P = models.CharField(max_length=255)
-#     R1 = models.CharField(max_length=255)
-#     R2 = models.CharField(max_length=255)
-#     R3 = models.CharField(max_length=255)
-
-
-# class Volume_Delivery(models.Model):
-#     stock = models.ForeignKey(Stocks)
-#     date = models.ForeignKey(Date)
-#     delivery_day = models.CharField(max_length=255)
-#     price_change = models.CharField(max_length=255)
-#     inside = models.CharField(max_length=255)
-#     delivery_weekly = models.CharField(max_length=255)
-#     delivery_monthly = models.CharField(max_length=255)
-    
-
-
-# class volume_analyzer(models.Model):
-#     stock = models.ForeignKey(Stocks)
-#     date = models.ForeignKey(Date)
-#     vah = models.CharField(max_length=255)
-#     val = models.CharField(max_length=255)
-    
-    
-# class bhoom_analyzer(models.Model):
-#     stock = models.ForeignKey(Stocks)
-#     date = models.ForeignKey(Date)
-#     thirty_minute = models.CharField(max_length=255)
-#     day = models.CharField(max_length=255)
-#     weekday = models.CharField(max_length=255)
-    
-    
-    
-    
 class Sector(models.Model):
     sector = models.CharField(max_length=255)
+    
     def __str__(self):
         return self.sector
     
@@ -85,4 +20,30 @@ class Performance_Stock(models.Model):
 
     def __str__(self):
         return self.stock
+        
+class Stock_order(models.Model):
+    stockname = models.ForeignKey(Performance_Stock, on_delete=models.CASCADE, null=True,blank=True)
+    dateTimeField = models.DateField(auto_now_add=True)
+    closed_date = models.CharField(max_length=255,blank=True,null=True)   
+    price_order = models.IntegerField()
+    target_hit = models.IntegerField()
+    action = models.CharField(max_length=255,blank=True,null=True)        
+                   
+    def __str__(self):
+        return self.stockname
+
+
+class Forex_order(models.Model):
+    Forexname = models.CharField(max_length=255,blank=True,null=True)
+    dateTimeField = models.DateField(auto_now_add=True)
+    minutes = models.CharField(max_length=255,blank=True,null=True)
+    hours_macd = models.CharField(max_length=255,blank=True,null=True)  
+    day_ema = models.CharField(max_length=255,blank=True,null=True)  
+    day_macd = models.CharField(max_length=255,blank=True,null=True)  
+    weekly_ema = models.CharField(max_length=255,blank=True,null=True)  
+    weekly_macd = models.CharField(max_length=255,blank=True,null=True)  
+          
+                   
+    def __str__(self):
+        return self.stockname
     

@@ -1,6 +1,5 @@
 import yfinance as yf
 import pandas as pd
-import talib
 import numpy as np
 from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mpl_dates
@@ -9,6 +8,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from .models import *
 from io import StringIO
 from datetime import date
+import pandas_ta as ta
+import vectorbt as vbt
 
 def find_suppressed(day, new_tad):
     df2 = new_tad
@@ -80,31 +81,17 @@ def stock_scanner(stock_list):
         day = yf.download(i, period="360d", interval="1d")
         weeklo = yf.download(i, period="400d", interval="1wk")
 
-        minutes['EMA_21'] = talib.EMA(minutes['Close'], timeperiod=21)
-        minutes['EMA_50'] = talib.EMA(minutes['Close'], timeperiod=50)
-
-        Hr['EMA_21'] = talib.EMA(Hr['Close'], timeperiod=21)
-        Hr['EMA_50'] = talib.EMA(Hr['Close'], timeperiod=50)
-
-        day['EMA_21'] = talib.EMA(day['Close'], timeperiod=21)
-        day['EMA_50'] = talib.EMA(day['Close'], timeperiod=50)
-        day['macd'], day['macdsignal'], day['macdhist'] = talib.MACD(
-            day['Close'], fastperiod=12, slowperiod=26, signalperiod=9)
-
-        weeklo['EMA_21'] = talib.EMA(weeklo['Close'], timeperiod=21)
-        weeklo['EMA_50'] = talib.EMA(weeklo['Close'], timeperiod=50)
-        weeklo['macd'], weeklo['macdsignal'], weeklo['macdhist'] = talib.MACD(
-            weeklo['Close'], fastperiod=12, slowperiod=26, signalperiod=9)
-
-        minutes['Trend'] = minutes['EMA_21'] > minutes['EMA_50']
-        Hr['Trend'] = Hr['EMA_21'] > Hr['EMA_50']
-
-        day['Trend'] = day['EMA_21'] > day['EMA_50']
-        day['macd_trend'] = day['macd'] > day['macdsignal']
-
-        weeklo['Trend'] = weeklo['EMA_21'] > weeklo['EMA_50']
-        weeklo['macd_trend'] = weeklo['macd'] > weeklo['macdsignal']
         
+        minutes['Trend'] = minutes.ta.ema(21, append=True) > minutes.ta.ema(50, append=True)
+        Hr['Trend'] = Hr.ta.ema(21, append=True) > Hr.ta.ema(50, append=True)
+        day['Trend'] = day.ta.ema(21, append=True) > day.ta.ema(50, append=True)
+        weeklo['Trend'] = weeklo.ta.ema(21, append=True) > weeklo.ta.ema(50, append=True)
+        
+        day.ta.macd(close=day['Close'], fast=12, slow=26, signal=9, append=True)
+        day['macd_trend'] = day['MACD_12_26_9'] > day['MACDs_12_26_9']
+        
+        weeklo.ta.macd(close=weeklo['Close'], fast=12, slow=26, signal=9, append=True)
+        weeklo['macd_trend'] = weeklo['MACD_12_26_9'] > weeklo['MACDs_12_26_9']
         
 
         new_tad = day

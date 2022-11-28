@@ -1,6 +1,5 @@
 import yfinance as yf
 import pandas as pd
-import talib
 import numpy as np
 from mpl_finance import candlestick_ohlc
 import matplotlib.dates as mpl_dates
@@ -11,7 +10,7 @@ from io import StringIO
 import MetaTrader5 as mt5
 import pytz
 from .order import *
-
+import pandas_ta as ta
 def stock_mt():
     if not mt5.initialize():
         print("initialize() failed, error code =", mt5.last_error())
@@ -37,43 +36,39 @@ def forex_scanner(forex_list):
 
         weeklo = mt5.copy_rates_from_pos(i, mt5.TIMEFRAME_W1, 0, 100)
         weeklo = pd.DataFrame(weeklo)
+        
+        
 
         minutes['time'] = pd.to_datetime(minutes['time'], unit='s')
-
-        minutes['EMA_21'] = talib.EMA(minutes['close'], timeperiod=21)
-        minutes['EMA_50'] = talib.EMA(minutes['close'], timeperiod=50)
+        minutes['Trend'] = minutes.ta.ema(21, append=True) > minutes.ta.ema(50, append=True)
+        
 
         Hr['time'] = pd.to_datetime(Hr['time'], unit='s')
-        Hr['EMA_21'] = talib.EMA(Hr['close'], timeperiod=21)
-        Hr['EMA_50'] = talib.EMA(Hr['close'], timeperiod=50)
-        Hr['macd'], Hr['macdsignal'], Hr['macdhist'] = talib.MACD(
-            Hr['close'], fastperiod=12, slowperiod=26, signalperiod=9)
+        Hr['Trend'] = Hr.ta.ema(21, append=True) > Hr.ta.ema(50, append=True)
+        Hr.ta.macd(close=weeklo['close'], fast=12, slow=26, signal=9, append=True)
+        Hr['macd_trend'] = Hr['MACD_12_26_9'] > Hr['MACDs_12_26_9']
+        
+    
 
         day['time'] = pd.to_datetime(day['time'], unit='s')
-        day['EMA_21'] = talib.EMA(day['close'], timeperiod=21)
-        day['EMA_50'] = talib.EMA(day['close'], timeperiod=50)
-        day['macd'], day['macdsignal'], day['macdhist'] = talib.MACD(
-            day['close'], fastperiod=12, slowperiod=26, signalperiod=9)
+        day['Trend'] = day.ta.ema(21, append=True) > day.ta.ema(50, append=True)
+        day.ta.macd(close=weeklo['close'], fast=12, slow=26, signal=9, append=True)
+        day['macd_trend'] = day['MACD_12_26_9'] > day['MACDs_12_26_9']
 
         weeklo['time'] = pd.to_datetime(weeklo['time'], unit='s')
-        weeklo['EMA_21'] = talib.EMA(weeklo['close'], timeperiod=21)
-        weeklo['EMA_50'] = talib.EMA(weeklo['close'], timeperiod=50)
-        weeklo['macd'], weeklo['macdsignal'], weeklo['macdhist'] = talib.MACD(
-            weeklo['close'], fastperiod=12, slowperiod=26, signalperiod=9)
+        weeklo['Trend'] = weeklo.ta.ema(21, append=True) > weeklo.ta.ema(50, append=True)
+        weeklo.ta.macd(close=weeklo['close'], fast=12, slow=26, signal=9, append=True)
+        weeklo['macd_trend'] = weeklo['MACD_12_26_9'] > weeklo['MACDs_12_26_9']
 
-        minutes['Trend'] = minutes['EMA_21'] > minutes['EMA_50']
+      
         minutes.set_index('time', inplace=True)
 
-        Hr['Trend'] = Hr['EMA_21'] > Hr['EMA_50']
-        Hr['macd_trend'] = Hr['macd'] > Hr['macdsignal']
+        
         Hr.set_index('time', inplace=True)
 
-        day['Trend'] = day['EMA_21'] > day['EMA_50']
-        day['macd_trend'] = day['macd'] > day['macdsignal']
+     
         day.set_index('time', inplace=True)
        
-        weeklo['Trend'] = weeklo['EMA_21'] > weeklo['EMA_50']
-        weeklo['macd_trend'] = weeklo['macd'] > weeklo['macdsignal']
         weeklo.set_index('time', inplace=True)
 
         minuts = minutes.tail(200)[::-1]
@@ -122,31 +117,44 @@ def forex_scanner(forex_list):
         if minutes['Trend'][1] == True and minutes['Trend'][0] == False:
             # Performance_Stock.objects.filter(name=i).update(signal= minutes['Trend'][1],name=i,close=minutes['close'][1])
 
-            if minutes['Trend'][1] == True and minutes['1_hr_trend'][1] == True and minutes['1_day_macd_trend'][1] == True and minutes['1_day_trend'][1] == True and minutes['1_weekly_trend'][1] == True and minutes['1_weekly_macd_trend'][1] == True:
+            if (minutes['Trend'][1] == True or minutes['close'][1] > minutes['EMA_21'][1]) and minutes['1_hr_trend'][1] == True  and minutes['1_day_macd_trend'][1] == True and minutes['1_day_trend'][1] == True and minutes['1_weekly_trend'][1] == True and minutes['1_weekly_macd_trend'][1] == True:
                 minutes['Signla'] = 'Strong Buy'
                 Buy_executed_order(i,700,380)
-            elif minutes['Trend'][1] == False and minutes['1_hr_trend'][1] == False and minutes['1_day_macd_trend'][1] == False and minutes['1_day_trend'][1] == False and minutes['1_weekly_trend'][1] == False and minutes['1_weekly_macd_trend'][1] == False:
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],hours_macd=minutes['1_hr_trend'][1],day_ema=minutes['1_day_trend'][1],day_macd=minutes['1_day_macd_trend'][1],weekly_ema=minutes['1_weekly_trend'][1],weekly_macd=minutes['1_weekly_macd_trend'][1])
+           
+            elif (minutes['Trend'][1] == False or minutes['close'][1] < minutes['EMA_21'][1]) and minutes['1_hr_trend'][1] == False and minutes['1_day_macd_trend'][1] == False and minutes['1_day_trend'][1] == False and minutes['1_weekly_trend'][1] == False and minutes['1_weekly_macd_trend'][1] == False:
                 minutes['Signla'] = 'Strong Sell'
                 Sell_executed_order(i,700,380)
-            elif minutes['Trend'][1] == False and minutes['1_hr_trend'][1] == False and minutes['1_day_macd_trend'][1] == False   and minutes['1_weekly_macd_trend'][1] == False:
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],hours_macd=minutes['1_hr_trend'][1],day_ema=minutes['1_day_trend'][1],day_macd=minutes['1_day_macd_trend'][1],weekly_ema=minutes['1_weekly_trend'][1],weekly_macd=minutes['1_weekly_macd_trend'][1])
+
+            elif (minutes['Trend'][1] == False or minutes['close'][1] < minutes['EMA_21'][1]) and minutes['1_hr_trend'][1] == False and minutes['1_day_macd_trend'][1] == False   and minutes['1_weekly_macd_trend'][1] == False:
                 minutes['Signla'] = 'Strong Sell'
                 Sell_executed_order(i,1000,500)
-            elif minutes['Trend'][1] == True and minutes['1_hr_trend'][1] == True and minutes['1_day_macd_trend'][1] == True   and minutes['1_weekly_macd_trend'][1] == True:
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],hours_macd=minutes['1_hr_trend'][1],day_macd=minutes['1_day_macd_trend'][1],weekly_macd=minutes['1_weekly_macd_trend'][1])
+
+            elif (minutes['Trend'][1] == True or minutes['close'][1] > minutes['EMA_21'][1]) and minutes['1_hr_trend'][1] == True and minutes['1_day_macd_trend'][1] == True   and minutes['1_weekly_macd_trend'][1] == True:
                 minutes['Signla'] = 'Strong Buy'
                 Buy_executed_order(i,1000,500)
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],hours_macd=minutes['1_hr_trend'][1],day_macd=minutes['1_day_macd_trend'][1],weekly_macd=minutes['1_weekly_macd_trend'][1])
+
                   
-            elif minutes['Trend'][1] == True and minutes['1_day_macd_trend'][1] == True and minutes['1_day_trend'][1] == True:
+            elif (minutes['Trend'][1] == True or minutes['close'][1] > minutes['EMA_21'][1]) and minutes['1_day_macd_trend'][1] == True and minutes['1_day_trend'][1] == True:
                 minutes['Signla'] = 'Buy'
                 Buy_executed_order(i,600,350)
-            elif minutes['Trend'][1] == False and minutes['1_day_macd_trend'][1] == False and minutes['1_day_trend'][1] == False:
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],day_macd=minutes['1_day_macd_trend'][1],day_ema=minutes['1_day_trend'][1])
+
+            elif (minutes['Trend'][1] == False or  minutes['close'][1] < minutes['EMA_21'][1]) and minutes['1_day_macd_trend'][1] == False and minutes['1_day_trend'][1] == False:
                 minutes['Signla'] = 'Sell'
                 Sell_executed_order(i,600,350)
-            elif minutes['Trend'][1] == True and minutes['1_hr_trend'][1] == True:
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],day_macd=minutes['1_day_macd_trend'][1],day_ema=minutes['1_day_trend'][1])
+            elif (minutes['Trend'][1] == True or  minutes['close'][1] > minutes['EMA_21'][1]) and minutes['1_hr_trend'][1] == True:
                 minutes['Signla'] = 'Buy'
                 Buy_executed_order(i,500,350)
-            elif minutes['Trend'][1] == False and minutes['1_hr_trend'][1] == False:
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],hours_macd=minutes['1_hr_trend'][1])
+            elif (minutes['Trend'][1] == False or  minutes['close'][1] > minutes['EMA_21'][1]) and minutes['1_hr_trend'][1] == False:
                 minutes['Signla'] = 'Sell'
                 Sell_executed_order(i,500,350)
+                Forex_order.objects.create(Forexname=i,minutes=minutes['Trend'][1],hours_macd=minutes['1_hr_trend'][1])
           
             else:
                 minutes['Signla'] = 'Wait'
