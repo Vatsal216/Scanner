@@ -3,9 +3,7 @@ import pytz
 import time
 import pandas as pd
 import numpy as np
-import talib
-
-
+import pandas_ta as ta
 
 class EMA_Analysis():
 
@@ -28,18 +26,14 @@ class EMA_Analysis():
 
         df1 = pd.DataFrame(rates1)
         df1['time']=pd.to_datetime(df1['time'], unit='s')
-        df1['MA_20'] = talib.MA(df1['tick_volume'],timeperiod=20,matype=0)
-        df1['EMA_21']= talib.EMA(df1['close'],timeperiod=21)
-        df1['EMA_50']= talib.EMA(df1['close'],timeperiod=50)
+        df1['Trend'] = df1.ta.ema(21, append=True) > df1.ta.ema(50, append=True)
+
        
         return df1
     
     @staticmethod
     def Build_EMA_Condition(df1):
         
-        df1['isMaxima'] = max(df1['close'].tolist())
-        df1['isMin'] = min(df1['close'].tolist())
-        df1['Trend'] = df1['EMA_21'] > df1['EMA_50']
         
         df1 = df1.loc[:,['time','isMaxima','isMin','Trend']]
         df1.set_index('time', inplace=True)
